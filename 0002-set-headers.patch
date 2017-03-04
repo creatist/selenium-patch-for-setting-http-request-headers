@@ -1,0 +1,34 @@
+--- selenium-old/selenium-3.0.2/py/selenium/webdriver/remote/webdriver.py	2016-10-06 09:24:22.000000000 -0700
++++ selenium/webdriver/remote/webdriver.py	2017-03-03 22:48:36.379698643 -0800
+@@ -213,7 +213,7 @@
+         else:
+             return value
+ 
+-    def execute(self, driver_command, params=None):
++    def execute(self, driver_command, params=None,headers=None):
+         """
+         Sends a command to be executed by a command.CommandExecutor.
+ 
+@@ -231,7 +231,7 @@
+                 params['sessionId'] = self.session_id
+ 
+         params = self._wrap_value(params)
+-        response = self.command_executor.execute(driver_command, params)
++        response = self.command_executor.execute(driver_command, params,headers=headers)
+         if response:
+             self.error_handler.check_response(response)
+             response['value'] = self._unwrap_value(
+@@ -241,11 +241,11 @@
+         # a success
+         return {'success': 0, 'value': None, 'sessionId': self.session_id}
+ 
+-    def get(self, url):
++    def get(self, url,headers=None):
+         """
+         Loads a web page in the current browser session.
+         """
+-        self.execute(Command.GET, {'url': url})
++        self.execute(Command.GET, {'url': url},headers=headers)
+ 
+     @property
+     def title(self):

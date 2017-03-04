@@ -1,0 +1,60 @@
+--- selenium-old/selenium-3.0.2/py/selenium/webdriver/remote/remote_connection.py	2016-11-23 03:50:54.000000000 -0800
++++ selenium/webdriver/remote/remote_connection.py	2017-03-03 23:15:10.451700258 -0800
+@@ -388,7 +388,7 @@
+                 ('POST', '/session/$sessionId/context'),
+         }
+ 
+-    def execute(self, command, params):
++    def execute(self, command, params,headers=None):
+         """
+         Send a command to the remote server.
+ 
+@@ -405,9 +405,37 @@
+         data = utils.dump_json(params)
+         path = string.Template(command_info[1]).substitute(params)
+         url = '%s%s' % (self._url, path)
+-        return self._request(command_info[0], url, body=data)
++        return self._request(command_info[0], url, body=data,headers=headers)
+ 
+-    def _request(self, method, url, body=None):
++    def request_add_one_header(self,request,key,headers):
++        if key in headers:
++            request.add_header(key,headers[key])
++        return request
++
++    def request_add_headers(self,request,headers):
++        if not headers:
++            return request
++        request = self.request_add_one_header(request,'Accept',headers)
++        request = self.request_add_one_header(request,'Accept-Charset',headers)
++        request = self.request_add_one_header(request,'Accept-Encoding',headers)
++        request = self.request_add_one_header(request,'Accept-Ranges',headers)
++        request = self.request_add_one_header(request,'Authorization',headers)
++        request = self.request_add_one_header(request,'Connection',headers)
++        request = self.request_add_one_header(request,'Content-Length',headers)
++        request = self.request_add_one_header(request,'Content-Type',headers)
++        request = self.request_add_one_header(request,'Cookie',headers)
++        request = self.request_add_one_header(request,'Date',headers)
++        request = self.request_add_one_header(request,'Host',headers)
++        request = self.request_add_one_header(request,'httpVersion',headers)
++        request = self.request_add_one_header(request,'method',headers)
++        request = self.request_add_one_header(request,'Referer',headers)
++        request = self.request_add_one_header(request,'Pragma',headers)
++        request = self.request_add_one_header(request,'User-Agent',headers)
++
++        return request
++
++
++    def _request(self, method, url, body=None,headers=None):
+         """
+         Send an HTTP request to the remote server.
+ 
+@@ -468,6 +496,8 @@
+             request.add_header('Accept', 'application/json')
+             request.add_header('Content-Type', 'application/json;charset=UTF-8')
+ 
++            self.request_add_headers(request,headers)
++
+             if password_manager:
+                 opener = url_request.build_opener(url_request.HTTPRedirectHandler(),
+                                                   HttpErrorHandler(),
